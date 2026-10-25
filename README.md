@@ -19,14 +19,6 @@ A Streamlit web app that estimates the resale price of a used car from its compa
 pip install -r requirements.txt
 streamlit run app.py
 ```
-
-## Deploy on Streamlit Community Cloud
-
-1. Go to https://share.streamlit.io and sign in with GitHub.
-2. Click **New app** and choose this repository, branch `main`, main file `app.py`.
-3. Under **Advanced settings** select Python 3.12 or 3.13.
-4. Click **Deploy**.
-
 ## Notes
 
 - The data is from 2019, so the year input is capped at 2019 and prices reflect the 2019 market.
