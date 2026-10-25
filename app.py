@@ -53,7 +53,7 @@ car_data = load_data()
 
 st.set_page_config(page_title="Car Price Predictor", page_icon="🚗", layout="centered")
 st.title("🚗 Car Price Predictor")
-st.caption("Estimate the resale price of a used car based on historical Quikr listings.")
+st.caption("Estimate the resale price of a used car based on 2019 Quikr listings.")
 
 company = st.selectbox("Company", sorted(car_data['company'].unique()))
 
@@ -63,9 +63,12 @@ fuel_type = st.selectbox("Fuel type", sorted(matching['fuel_type'].unique()))
 
 col1, col2 = st.columns(2)
 with col1:
-    year = st.number_input("Year of purchase", min_value=1995, max_value=2026, value=2015, step=1)
+    # model was trained on 2019 listings; later years give negative age and wrong prices
+    year = st.number_input("Manufacturing year", min_value=1995, max_value=CURRENT_YEAR,
+                           value=2015, step=1)
 with col2:
-    kms_driven = st.number_input("Kilometers driven", min_value=0, value=30000, step=1000)
+    kms_driven = st.number_input("Kilometers driven", min_value=0, max_value=400000,
+                                 value=30000, step=1000)
 
 if st.button("Predict Price", type="primary"):
     row = pd.DataFrame([dict(name=name, company=company, year=year,
@@ -73,3 +76,4 @@ if st.button("Predict Price", type="primary"):
     features = add_features(row)[CATS + NUMS]
     price = model.predict(features)[0]
     st.success(f"Estimated Price: ₹ {price:,.0f}")
+    st.caption("Estimates are approximate (model R² ≈ 0.72) and reflect 2019 market prices.")
