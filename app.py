@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-CURRENT_YEAR = 2019
+CURRENT_YEAR = 2026
 LUXURY = {'Audi', 'Mercedes', 'BMW', 'Jaguar', 'Land', 'Mini', 'Volvo', 'Porsche'}
 CATS = ['company', 'fuel_type', 'brand_model']
 NUMS = ['age', 'log_kms', 'kms_per_year', 'luxury', 'age_x_lux', 'dep',
@@ -22,7 +22,8 @@ def price_inverse_transform(y):
 
 def add_features(df):
     df = df.copy()
-    df['age'] = (CURRENT_YEAR - df['year']).clip(lower=0)
+    # beyond age 18 the fitted curve turns upward, so older cars are priced as 18-year-old
+    df['age'] = (CURRENT_YEAR - df['year']).clip(lower=0, upper=18)
     df['log_kms'] = np.log1p(df['kms_driven'])
     df['kms_per_year'] = df['kms_driven'] / df['age'].clip(lower=1)
     df['brand_model'] = df['name'].str.split().str[:2].str.join(' ')
@@ -63,9 +64,8 @@ fuel_type = st.selectbox("Fuel type", sorted(matching['fuel_type'].unique()))
 
 col1, col2 = st.columns(2)
 with col1:
-    # training data ends in 2019, so years after 2019 are treated as brand new (age 0)
-    year = st.number_input("Manufacturing year", min_value=1995, max_value=2026,
-                           value=2015, step=1)
+    year = st.number_input("Manufacturing year", min_value=2002, max_value=CURRENT_YEAR,
+                           value=2018, step=1)
 with col2:
     kms_driven = st.number_input("Kilometers driven", min_value=0, max_value=400000,
                                  value=30000, step=1000)
@@ -76,4 +76,4 @@ if st.button("Predict Price", type="primary"):
     features = add_features(row)[CATS + NUMS]
     price = model.predict(features)[0]
     st.success(f"Estimated Price: ₹ {price:,.0f}")
-    st.caption("Estimates are approximate (model R² ≈ 0.72) and reflect 2019 market prices.")
+    st.caption("Estimates are approximate (model R² ≈ 0.72). Prices are based on car age in 2026 using 2019 listing data, so they do not include inflation.")
