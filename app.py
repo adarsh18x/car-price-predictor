@@ -22,7 +22,7 @@ def price_inverse_transform(y):
 
 def add_features(df):
     df = df.copy()
-    df['age'] = CURRENT_YEAR - df['year']
+    df['age'] = (CURRENT_YEAR - df['year']).clip(lower=0)
     df['log_kms'] = np.log1p(df['kms_driven'])
     df['kms_per_year'] = df['kms_driven'] / df['age'].clip(lower=1)
     df['brand_model'] = df['name'].str.split().str[:2].str.join(' ')
@@ -63,8 +63,8 @@ fuel_type = st.selectbox("Fuel type", sorted(matching['fuel_type'].unique()))
 
 col1, col2 = st.columns(2)
 with col1:
-    # model was trained on 2019 listings; later years give negative age and wrong prices
-    year = st.number_input("Manufacturing year", min_value=1995, max_value=CURRENT_YEAR,
+    # training data ends in 2019, so years after 2019 are treated as brand new (age 0)
+    year = st.number_input("Manufacturing year", min_value=1995, max_value=2026,
                            value=2015, step=1)
 with col2:
     kms_driven = st.number_input("Kilometers driven", min_value=0, max_value=400000,
